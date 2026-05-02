@@ -100,6 +100,7 @@ interface AdvanceState {
   updateAdvance: (empId: string, data: Partial<AdvanceAccount>) => void;
   getAdvance: (empId: string) => AdvanceAccount | undefined;
   addInstallment: (empId: string, amount: number) => { success: boolean; message: string };
+  deductFromAdvance: (empId: string, amount: number) => void;
 }
 
 export const useAdvanceStore = create<AdvanceState>()(
@@ -139,6 +140,18 @@ export const useAdvanceStore = create<AdvanceState>()(
         }));
         return { success: true, message: `อนุมัติเบิกเงินล่วงหน้างวดที่ ${(adv?.installments.length || 0) + 1} เรียบร้อยแล้ว` };
       },
+      deductFromAdvance: (empId, amount) =>
+        set((s) => ({
+          advances: s.advances.map((a) => {
+            if (a.empId !== empId) return a;
+            const newBalance = Math.max(0, a.balance - amount);
+            return {
+              ...a,
+              balance: newBalance,
+              status: newBalance === 0 ? 'settled' : 'active',
+            };
+          }),
+        })),
     }),
     { name: 'sfp_advances' }
   )

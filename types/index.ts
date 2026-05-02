@@ -65,3 +65,13 @@ export interface Activity {
   timestamp: number;
   type: 'ticket' | 'loan' | 'advance' | 'auth' | 'payroll';
 }
+
+export interface ScheduledDeduction {
+  id: string;
+  empId: string;
+  ticketId: string;
+  amount: number;
+  month: string; // "2026-05"
+  status: 'pending' | 'deducted';
+  deductedAt?: string;
+}

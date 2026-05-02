@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { useEmployeeStore } from '@/stores/employeeStore';
 import { useActivityStore } from '@/stores/activityStore';
-import { hashPassword } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { DEFAULT_PASSWORD } from '@/stores/employeeStore';
 
 export default function AdminEmployeesPage() {
   const employees = useEmployeeStore((s) => s.employees);
@@ -12,6 +12,7 @@ export default function AdminEmployeesPage() {
   const addActivity = useActivityStore((s) => s.addActivity);
   const [search, setSearch] = useState('');
   const [showResetModal, setShowResetModal] = useState<string | null>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState<string | null>(null);
 
   const filtered = employees.filter((e) =>
     e.empNumber.toLowerCase().includes(search.toLowerCase()) || e.name.includes(search)
@@ -20,8 +21,8 @@ export default function AdminEmployeesPage() {
   const handleResetPassword = (empId: string) => {
     const emp = employees.find((e) => e.id === empId);
     if (!emp) return;
-    updateEmployee(empId, { password: hashPassword('std1234') });
-    addActivity({ icon: '🔑', description: `รีเซ็ตรหัสผ่านของ ${emp.name} (${emp.empNumber})`, type: 'auth' });
+    updateEmployee(empId, { password: emp.password, plainPassword: DEFAULT_PASSWORD });
+    addActivity({ icon: '🔑', description: `รีเซ็ตรหัสผ่านของ ${emp.name} (${emp.empNumber}) เป็น "${DEFAULT_PASSWORD}"`, type: 'auth' });
     setShowResetModal(null);
   };
 
@@ -38,7 +39,7 @@ export default function AdminEmployeesPage() {
       </div>
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[700px]">
+          <table className="w-full text-left min-w-[800px]">
             <thead>
               <tr className="bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white text-xs">
                 <th className="px-4 py-3 font-semibold">รหัส</th>
@@ -46,6 +47,7 @@ export default function AdminEmployeesPage() {
                 <th className="px-4 py-3 font-semibold">แผนก</th>
                 <th className="px-4 py-3 font-semibold">ตำแหน่ง</th>
                 <th className="px-4 py-3 text-center font-semibold">สิทธิ์</th>
+                <th className="px-4 py-3 text-center font-semibold">รหัสผ่านปัจจุบัน</th>
                 <th className="px-4 py-3 text-center font-semibold">สถานะ</th>
                 <th className="px-4 py-3 text-center font-semibold">จัดการ</th>
               </tr>
@@ -63,13 +65,18 @@ export default function AdminEmployeesPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">
+                    <button onClick={() => setShowPasswordModal(emp.id)} className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors font-mono">
+                      {emp.plainPassword}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-center">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${emp.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                       {emp.status === 'active' ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button onClick={() => setShowResetModal(emp.id)} className="text-xs px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
-                      🔑 รีเซ็ตรหัสผ่าน
+                      🔑 รีเซ็ต
                     </button>
                   </td>
                 </tr>
@@ -78,11 +85,15 @@ export default function AdminEmployeesPage() {
           </table>
         </div>
       </Card>
+
+      {/* Reset Password Modal */}
       {showResetModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
             <h3 className="text-lg font-bold text-gray-900">รีเซ็ตรหัสผ่าน</h3>
-            <p className="text-sm text-gray-500">รหัสผ่านใหม่จะถูกตั้งเป็น: <span className="font-mono text-purple-600 font-bold">std1234</span></p>
+            <p className="text-sm text-gray-500">
+              รหัสผ่านใหม่จะถูกตั้งเป็น: <span className="font-mono text-purple-600 font-bold">"{DEFAULT_PASSWORD}"</span>
+            </p>
             <div className="flex gap-3">
               <Button variant="secondary" className="flex-1" onClick={() => setShowResetModal(null)}>ยกเลิก</Button>
               <Button className="flex-1" onClick={() => handleResetPassword(showResetModal)}>ยืนยัน</Button>
@@ -90,6 +101,25 @@ export default function AdminEmployeesPage() {
           </div>
         </div>
       )}
+
+      {/* View Password Modal */}
+      {showPasswordModal && (() => {
+        const emp = employees.find((e) => e.id === showPasswordModal);
+        if (!emp) return null;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+              <h3 className="text-lg font-bold text-gray-900">รหัสผ่านของ {emp.name}</h3>
+              <div className="p-4 bg-purple-50 rounded-xl text-center">
+                <p className="text-xs text-gray-500 mb-2">รหัสผ่านปัจจุบัน</p>
+                <p className="text-2xl font-mono font-bold text-purple-700">{emp.plainPassword}</p>
+              </div>
+              <p className="text-xs text-gray-400">แจ้งรหัสผ่านให้พนักงานทราบหลังจากรีเซ็ต</p>
+              <Button className="w-full" onClick={() => setShowPasswordModal(null)}>ปิด</Button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

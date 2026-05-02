@@ -38,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <a href="/admin/tickets" className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-colors text-sm font-medium">📋 คำขอทั้งหมด</a>
           <a href="/admin/loans" className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-colors text-sm font-medium">🏦 บัญชีเงินกู้</a>
           <a href="/admin/advances" className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-colors text-sm font-medium">💸 บัญชีเบิกล่วงหน้า</a>
+          <a href="/admin/payroll" className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-colors text-sm font-medium">📅 หักเงิน ณ วันที่ 15</a>
           <div className="px-3 py-1 mt-4 text-xs font-semibold text-purple-400 uppercase tracking-wider">ทั่วไป</div>
           <a href="/employee/dashboard" className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-colors text-sm font-medium">👤 หน้าพนักงาน</a>
         </nav>

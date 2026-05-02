@@ -49,6 +49,7 @@ export default function AdminDashboard() {
         <Link href="/admin/tickets"><Card className="hover:shadow-lg transition-shadow cursor-pointer"><Ticket className="w-6 h-6 text-purple-500 mb-2" /><p className="font-semibold text-gray-900">คำขอทั้งหมด</p></Card></Link>
         <Link href="/admin/loans"><Card className="hover:shadow-lg transition-shadow cursor-pointer"><div className="text-2xl mb-1">🏦</div><p className="font-semibold text-gray-900">บัญชีเงินกู้</p></Card></Link>
         <Link href="/admin/advances"><Card className="hover:shadow-lg transition-shadow cursor-pointer"><div className="text-2xl mb-1">💸</div><p className="font-semibold text-gray-900">บัญชีเบิกล่วงหน้า</p></Card></Link>
+        <Link href="/admin/payroll"><Card className="hover:shadow-lg transition-shadow cursor-pointer"><div className="text-2xl mb-1">📅</div><p className="font-semibold text-gray-900">หักเงินวันที่ 15</p></Card></Link>
       </div>
       {pending > 0 && (
         <Card className="border-yellow-300 bg-yellow-50">
