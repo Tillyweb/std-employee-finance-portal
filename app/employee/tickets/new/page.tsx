@@ -61,7 +61,7 @@ export default function NewTicketPage() {
               className="w-full px-4 py-2.5 border border-purple-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none" rows={4} />
           </div>
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-            <p className="text-sm text-yellow-800">⚠️ คำขอจะถูกส่งไปให้ผู้ดูแลระบบพิจารณา กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนส่ง</p>
+            <p className="text-sm text-yellow-800">⚠️ วงเงินกู้สูงสุด: ฿50,000 ต่อครั้ง | คำขอจะถูกส่งให้ผู้ดูแลระบบพิจารณา</p>
           </div>
           <div className="flex gap-3">
             <Button variant="secondary" type="button" onClick={() => router.back()} className="flex-1">ยกเลิก</Button>

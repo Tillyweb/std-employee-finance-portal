@@ -9,6 +9,7 @@ export interface Employee {
   position: string;
   baseSalary: number;
   password: string; // btoa hashed
+  plainPassword: string; // original password (admin can view/reset)
   role: 'employee' | 'admin';
   vacationBalance: number;
   status: 'active' | 'inactive';
