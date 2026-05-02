@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useLoanStore } from '@/stores/loanStore';
 import { useAdvanceStore } from '@/stores/advanceStore';
@@ -19,7 +19,8 @@ export default function EmployeeDashboard() {
   }, [isHydrated, initSeedData]);
   const loan = useLoanStore((s) => s.getLoan(currentUser?.empNumber ?? ''));
   const advance = useAdvanceStore((s) => s.getAdvance(currentUser?.empNumber ?? ''));
-  const tickets = useTicketStore((s) => s.getTicketsByEmp(currentUser?.empNumber ?? ''));
+  const allTickets = useTicketStore((s) => s.tickets);
+  const tickets = useMemo(() => allTickets.filter((t) => t.empId === (currentUser?.empNumber ?? '')), [allTickets, currentUser?.empNumber]);
   const pendingCount = tickets.filter((t) => t.status === 'pending').length;
   const approvedCount = tickets.filter((t) => t.status === 'approved').length;
   const recentTickets = tickets.slice(-5).reverse();
