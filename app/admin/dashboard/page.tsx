@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useEmployeeStore } from '@/stores/employeeStore';
 import { useTicketStore } from '@/stores/ticketStore';
@@ -10,7 +10,8 @@ import Link from 'next/link';
 export default function AdminDashboard() {
   const { currentUser } = useAuthStore();
   const employees = useEmployeeStore((s) => s.employees);
-  const tickets = useTicketStore((s) => s.getAllTickets());
+  const allTickets = useTicketStore((s) => s.tickets);
+  const tickets = allTickets;
   const pending = tickets.filter((t) => t.status === 'pending').length;
   const approved = tickets.filter((t) => t.status === 'approved').length;
   const rejected = tickets.filter((t) => t.status === 'rejected').length;

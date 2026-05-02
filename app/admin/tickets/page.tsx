@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTicketStore } from '@/stores/ticketStore';
 import { useLoanStore } from '@/stores/loanStore';
@@ -12,7 +12,8 @@ import { formatDate } from '@/lib/utils';
 
 export default function AdminTicketsPage() {
   const { currentUser } = useAuthStore();
-  const tickets = useTicketStore((s) => s.getAllTickets());
+  const allTickets = useTicketStore((s) => s.tickets);
+  const tickets = allTickets;
   const updateTicket = useTicketStore((s) => s.updateTicket);
   const addLoan = useLoanStore((s) => s.addLoan);
   const addInstallment = useAdvanceStore((s) => s.addInstallment);

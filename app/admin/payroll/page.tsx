@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useLoanStore } from '@/stores/loanStore';
 import { useAdvanceStore } from '@/stores/advanceStore';
@@ -22,7 +22,8 @@ export default function PayrollPage() {
   const deductLoan = useLoanStore((s) => s.deductFromLoan);
   const deductAdvance = useAdvanceStore((s) => s.deductFromAdvance);
   const updateTicket = useTicketStore((s) => s.updateTicket);
-  const tickets = useTicketStore((s) => s.getAllTickets());
+  const allTickets = useTicketStore((s) => s.tickets);
+  const tickets = allTickets;
   const addActivity = useActivityStore((s) => s.addActivity);
 
   const monthKey = getCurrentMonthKey();

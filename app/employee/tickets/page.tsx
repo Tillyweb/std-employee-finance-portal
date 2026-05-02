@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTicketStore } from '@/stores/ticketStore';
 import { Card } from '@/components/ui/Card';
@@ -7,7 +7,8 @@ import { formatDate } from '@/lib/utils';
 
 export default function EmployeeTicketsPage() {
   const { currentUser } = useAuthStore();
-  const tickets = useTicketStore((s) => s.getTicketsByEmp(currentUser?.empNumber ?? ''));
+  const allTickets = useTicketStore((s) => s.tickets);
+  const tickets = useMemo(() => allTickets.filter((t) => t.empId === (currentUser?.empNumber ?? '')), [allTickets, currentUser?.empNumber]);
   const sorted = [...tickets].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
