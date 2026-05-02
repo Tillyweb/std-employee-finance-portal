@@ -26,7 +26,7 @@ export default function LoginPage() {
     const ok = login(empId.trim(), password);
     if (ok) {
       const { currentUser } = useAuthStore.getState();
-      router.push(currentUser?.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      router.push(currentUser?.role === 'admin' ? '/admin/dashboard' : '/employee/dashboard');
     } else {
       setError('รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง');
       setLoading(false);
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
             <Input
               label="รหัสพนักงาน"
-              placeholder="เช่น STD001"
+              placeholder="เช่น STD004"
               value={empId}
               onChange={(e) => setEmpId(e.target.value)}
               autoComplete="username"
@@ -79,7 +79,7 @@ export default function LoginPage() {
             </Button>
 
             <div className="text-center text-xs text-gray-400 mt-2">
-              รหัสผ่านเริ่มต้น: <span className="font-mono text-purple-600">std1234</span><br/>
+              รหัสผ่านเริ่มต้น: <span className="font-mono text-purple-600">pass</span><br />
               Admin: <span className="font-mono text-purple-600">STD001</span> / <span className="font-mono text-purple-600">admin123</span>
             </div>
           </form>
