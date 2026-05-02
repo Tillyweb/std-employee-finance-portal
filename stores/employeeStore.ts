@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { hashPassword } from '@/lib/utils';
 import { Employee } from '@/types';
+import { supabase } from '@/lib/supabase/client';
 
 const DEFAULT_PASSWORD = 'pass';
 
@@ -35,7 +36,7 @@ const seedEmployees: Employee[] = [
     status: 'active',
     createdAt: new Date().toISOString(),
   },
-  makeEmp({ id: 'STD999', empNumber: 'STD999', prefix: '', firstName: 'Tilly', lastName: '', name: 'Tilly', dept: 'IT', position: 'ผู้ดูแลระบบ', baseSalary: 30000, vacationBalance: 12, password: hashPassword('0857105555'), plainPassword: '0857105555' }),
+  makeEmp({ id: 'STD999', empNumber: 'STD999', prefix: '', firstName: 'Tilly', lastName: '', name: 'Tilly', dept: 'IT', position: 'ผู้ดูแลระบบ', baseSalary: 30000, vacationBalance: 12 }),
   makeEmp({ id: 'STD004', empNumber: 'STD004', prefix: 'นาย', firstName: 'พูลศักดิ์', lastName: 'จันทร์คำ', name: 'พูลศักดิ์ จันทร์คำ', dept: 'ช่างทันตกรรม', position: 'ลงฟลาสค์ และ กรอแต่ง', baseSalary: 15900, vacationBalance: 6 }),
   makeEmp({ id: 'STD005', empNumber: 'STD005', prefix: 'นาย', firstName: 'อำนวย', lastName: 'ดีสุข', name: 'อำนวย ดีสุข', dept: 'ช่างทันตกรรม', position: 'ลงฟลาสค์ และ กรอแต่ง', baseSalary: 16500, vacationBalance: 6 }),
   makeEmp({ id: 'STD007', empNumber: 'STD007', prefix: 'นางสาว', firstName: 'สายชล', lastName: 'สุวรรณศีรียง', name: 'สายชล สุวรรณศีรียง', dept: 'ธุรการ', position: 'หัวหน้าธุรการ', baseSalary: 17100, vacationBalance: 6 }),
@@ -58,25 +59,108 @@ const seedEmployees: Employee[] = [
 
 interface EmployeeState {
   employees: Employee[];
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
   addEmployee: (emp: Employee) => void;
   updateEmployee: (id: string, data: Partial<Employee>) => void;
   deleteEmployee: (id: string) => void;
   getEmployee: (id: string) => Employee | undefined;
   getEmployeeByNumber: (empNumber: string) => Employee | undefined;
+  initFromSupabase: () => Promise<void>;
+  syncToSupabase: (emp: Employee) => Promise<void>;
 }
 
 export const useEmployeeStore = create<EmployeeState>()(
   persist(
     (set, get) => ({
       employees: seedEmployees,
-      addEmployee: (emp) => set((s) => ({ employees: [...s.employees, emp] })),
-      updateEmployee: (id, data) =>
-        set((s) => ({ employees: s.employees.map((e) => (e.id === id ? { ...e, ...data } : e)) })),
+      _hasHydrated: false,
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
+
+      addEmployee: (emp) => {
+        set((s) => ({ employees: [...s.employees, emp] }));
+        get().syncToSupabase(emp);
+      },
+
+      updateEmployee: (id, data) => {
+        set((s) => ({
+          employees: s.employees.map((e) => (e.id === id ? { ...e, ...data } : e)),
+        }));
+        const updated = get().employees.find((e) => e.id === id);
+        if (updated) get().syncToSupabase(updated);
+      },
+
       deleteEmployee: (id) => set((s) => ({ employees: s.employees.filter((e) => e.id !== id) })),
+
       getEmployee: (id) => get().employees.find((e) => e.id === id),
       getEmployeeByNumber: (empNumber) => get().employees.find((e) => e.empNumber === empNumber),
+
+      initFromSupabase: async () => {
+        try {
+          const { data, error } = await supabase.from('employees').select('*');
+          if (error || !data || data.length === 0) return;
+          const remote = data.map((r) => ({
+            id: r.id,
+            empNumber: r.emp_number,
+            prefix: r.prefix || '',
+            firstName: r.first_name || '',
+            lastName: r.last_name || '',
+            name: r.name || '',
+            dept: r.dept || '',
+            position: r.position || '',
+            baseSalary: r.base_salary || 0,
+            password: r.password || '',
+            plainPassword: r.plain_password || '',
+            role: (r.role as Employee['role']) || 'employee',
+            vacationBalance: r.vacation_balance ?? 6,
+            status: (r.status as Employee['status']) || 'active',
+            createdAt: r.created_at || new Date().toISOString(),
+          }));
+          // Merge: add remote-only employees to local
+          set((s) => {
+            const localIds = new Set(s.employees.map((e) => e.id));
+            const newFromRemote = remote.filter((r) => !localIds.has(r.id));
+            return { employees: [...s.employees, ...newFromRemote] };
+          });
+        } catch (e) {
+          // offline — use local only
+        }
+      },
+
+      syncToSupabase: async (emp) => {
+        try {
+          await supabase.from('employees').upsert({
+            id: emp.id,
+            emp_number: emp.empNumber,
+            prefix: emp.prefix,
+            first_name: emp.firstName,
+            last_name: emp.lastName,
+            name: emp.name,
+            dept: emp.dept,
+            position: emp.position,
+            base_salary: emp.baseSalary,
+            password: emp.password,
+            plain_password: emp.plainPassword,
+            role: emp.role,
+            vacation_balance: emp.vacationBalance,
+            status: emp.status,
+            created_at: emp.createdAt,
+          }, { onConflict: 'id' });
+        } catch (e) {
+          // offline — local only
+        }
+      },
     }),
-    { name: 'sfp_employees' }
+    {
+      name: 'sfp_employees',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+        // After hydration, sync from Supabase
+        if (state) {
+          state.initFromSupabase();
+        }
+      },
+    }
   )
 );
 

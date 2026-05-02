@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AdvanceAccount, AdvanceRecord } from '@/types';
+import { supabase } from '@/lib/supabase/client';
 
 const seedAdvances: AdvanceAccount[] = [
   {
@@ -101,23 +102,34 @@ interface AdvanceState {
   getAdvance: (empId: string) => AdvanceAccount | undefined;
   addInstallment: (empId: string, amount: number) => { success: boolean; message: string };
   deductFromAdvance: (empId: string, amount: number) => void;
+  initFromSupabase: () => Promise<void>;
+  syncToSupabase: (advance: AdvanceAccount) => Promise<void>;
 }
 
 export const useAdvanceStore = create<AdvanceState>()(
   persist(
     (set, get) => ({
       advances: seedAdvances,
-      addAdvance: (advance) =>
+
+      addAdvance: (advance) => {
         set((s) => {
           const existing = s.advances.find((a) => a.empId === advance.empId);
           if (existing) {
             return { advances: s.advances.map((a) => (a.empId === advance.empId ? advance : a)) };
           }
           return { advances: [...s.advances, advance] };
-        }),
-      updateAdvance: (empId, data) =>
-        set((s) => ({ advances: s.advances.map((a) => (a.empId === empId ? { ...a, ...data } : a)) })),
+        });
+        get().syncToSupabase(advance);
+      },
+
+      updateAdvance: (empId, data) => {
+        set((s) => ({ advances: s.advances.map((a) => (a.empId === empId ? { ...a, ...data } : a)) }));
+        const updated = get().advances.find((a) => a.empId === empId);
+        if (updated) get().syncToSupabase(updated);
+      },
+
       getAdvance: (empId) => get().advances.find((a) => a.empId === empId),
+
       addInstallment: (empId, amount) => {
         const adv = get().advances.find((a) => a.empId === empId);
         if (adv && adv.installments.length >= 4) {
@@ -138,9 +150,12 @@ export const useAdvanceStore = create<AdvanceState>()(
             };
           }),
         }));
+        const updated = get().advances.find((a) => a.empId === empId);
+        if (updated) get().syncToSupabase(updated);
         return { success: true, message: `อนุมัติเบิกเงินล่วงหน้างวดที่ ${(adv?.installments.length || 0) + 1} เรียบร้อยแล้ว` };
       },
-      deductFromAdvance: (empId, amount) =>
+
+      deductFromAdvance: (empId, amount) => {
         set((s) => ({
           advances: s.advances.map((a) => {
             if (a.empId !== empId) return a;
@@ -151,7 +166,51 @@ export const useAdvanceStore = create<AdvanceState>()(
               status: newBalance === 0 ? 'settled' : 'active',
             };
           }),
-        })),
+        }));
+        const updated = get().advances.find((a) => a.empId === empId);
+        if (updated) get().syncToSupabase(updated);
+      },
+
+      initFromSupabase: async () => {
+        try {
+          const { data, error } = await supabase.from('advances').select('*');
+          if (error || !data || data.length === 0) return;
+          const remote: AdvanceAccount[] = data.map((r) => ({
+            empId: r.emp_id,
+            name: r.name || '',
+            dept: r.dept || '',
+            position: r.position || '',
+            installments: typeof r.installments === 'string' ? JSON.parse(r.installments) : (r.installments || []),
+            totalAdvanced: r.total_advanced || 0,
+            balance: r.balance || 0,
+            status: (r.status as AdvanceAccount['status']) || 'active',
+          }));
+          set((s) => {
+            const localEmpIds = new Set(s.advances.map((a) => a.empId));
+            const newFromRemote = remote.filter((r) => !localEmpIds.has(r.empId));
+            return { advances: [...s.advances, ...newFromRemote] };
+          });
+        } catch (e) {
+          // offline
+        }
+      },
+
+      syncToSupabase: async (advance) => {
+        try {
+          await supabase.from('advances').upsert({
+            emp_id: advance.empId,
+            name: advance.name,
+            dept: advance.dept,
+            position: advance.position,
+            installments: JSON.stringify(advance.installments),
+            total_advanced: advance.totalAdvanced,
+            balance: advance.balance,
+            status: advance.status,
+          }, { onConflict: 'emp_id' });
+        } catch (e) {
+          // offline
+        }
+      },
     }),
     { name: 'sfp_advances' }
   )

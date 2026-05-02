@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { LoanAccount } from '@/types';
+import { supabase } from '@/lib/supabase/client';
 
 const seedLoans: LoanAccount[] = [
   { empId: 'STD001', name: 'ศิริพร เกียงจันทร์', dept: 'ช่างทันตกรรม', position: 'Tray และ Bite block', monthlyDeduction: 1000, previousBalance: 4000, currentBalance: 3000, status: 'active' },
@@ -21,31 +22,86 @@ interface LoanState {
   updateLoan: (empId: string, data: Partial<LoanAccount>) => void;
   getLoan: (empId: string) => LoanAccount | undefined;
   deductFromLoan: (empId: string, amount: number) => void;
+  initFromSupabase: () => Promise<void>;
+  syncToSupabase: (loan: LoanAccount) => Promise<void>;
 }
 
 export const useLoanStore = create<LoanState>()(
   persist(
     (set, get) => ({
       loans: seedLoans,
-      addLoan: (loan) =>
+
+      addLoan: (loan) => {
         set((s) => {
           const existing = s.loans.find((l) => l.empId === loan.empId);
           if (existing) {
             return { loans: s.loans.map((l) => (l.empId === loan.empId ? loan : l)) };
           }
           return { loans: [...s.loans, loan] };
-        }),
-      updateLoan: (empId, data) =>
-        set((s) => ({ loans: s.loans.map((l) => (l.empId === empId ? { ...l, ...data } : l)) })),
+        });
+        get().syncToSupabase(loan);
+      },
+
+      updateLoan: (empId, data) => {
+        set((s) => ({ loans: s.loans.map((l) => (l.empId === empId ? { ...l, ...data } : l)) }));
+        const updated = get().loans.find((l) => l.empId === empId);
+        if (updated) get().syncToSupabase(updated);
+      },
+
       getLoan: (empId) => get().loans.find((l) => l.empId === empId),
-      deductFromLoan: (empId, amount) =>
+
+      deductFromLoan: (empId, amount) => {
         set((s) => ({
           loans: s.loans.map((l) => {
             if (l.empId !== empId) return l;
             const newBalance = Math.max(0, l.currentBalance - amount);
             return { ...l, currentBalance: newBalance, status: newBalance === 0 ? 'paid_off' : 'active' };
           }),
-        })),
+        }));
+        const updated = get().loans.find((l) => l.empId === empId);
+        if (updated) get().syncToSupabase(updated);
+      },
+
+      initFromSupabase: async () => {
+        try {
+          const { data, error } = await supabase.from('loans').select('*');
+          if (error || !data || data.length === 0) return;
+          const remote: LoanAccount[] = data.map((r) => ({
+            empId: r.emp_id,
+            name: r.name || '',
+            dept: r.dept || '',
+            position: r.position || '',
+            monthlyDeduction: r.monthly_deduction || 0,
+            previousBalance: r.previous_balance || 0,
+            currentBalance: r.current_balance || 0,
+            status: (r.status as LoanAccount['status']) || 'active',
+          }));
+          set((s) => {
+            const localEmpIds = new Set(s.loans.map((l) => l.empId));
+            const newFromRemote = remote.filter((r) => !localEmpIds.has(r.empId));
+            return { loans: [...s.loans, ...newFromRemote] };
+          });
+        } catch (e) {
+          // offline
+        }
+      },
+
+      syncToSupabase: async (loan) => {
+        try {
+          await supabase.from('loans').upsert({
+            emp_id: loan.empId,
+            name: loan.name,
+            dept: loan.dept,
+            position: loan.position,
+            monthly_deduction: loan.monthlyDeduction,
+            previous_balance: loan.previousBalance,
+            current_balance: loan.currentBalance,
+            status: loan.status,
+          }, { onConflict: 'emp_id' });
+        } catch (e) {
+          // offline
+        }
+      },
     }),
     { name: 'sfp_loans' }
   )
