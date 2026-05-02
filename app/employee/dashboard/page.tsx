@@ -86,7 +86,6 @@ export default function EmployeeDashboard() {
             <InfoRow label="แผนก" value={currentUser?.dept ?? '-'} />
             <InfoRow label="ตำแหน่ง" value={currentUser?.position ?? '-'} />
             <InfoRow label="เงินเดือนพื้นฐาน" value={currentUser?.baseSalary ? `${currentUser.baseSalary.toLocaleString('th-TH')} บาท` : '-'} />
-            <InfoRow label="วันลาคงเหลือ" value={`${currentUser?.vacationBalance ?? 0} วัน`} />
           </div>
         </Card>
         <Card>

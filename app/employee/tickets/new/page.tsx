@@ -7,7 +7,7 @@ import { useActivityStore } from '@/stores/activityStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
-const MAX_LOAN = 50000;
+const MAX_LOAN = 5000;
 
 function NewTicketForm() {
   const searchParams = useSearchParams();
