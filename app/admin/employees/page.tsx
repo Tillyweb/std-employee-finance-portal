@@ -38,12 +38,15 @@ export default function AdminEmployeesPage() {
     e.empNumber.toLowerCase().includes(search.toLowerCase()) || e.name.includes(search)
   );
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const handleResetPassword = (empId: string) => {
     const emp = employees.find((e) => e.id === empId);
     if (!emp) return;
     updateEmployee(empId, { password: hashPassword(DEFAULT_PASSWORD), plainPassword: DEFAULT_PASSWORD });
     addActivity({ icon: '🔑', description: `รีเซ็ตรหัสผ่านของ ${emp.name} (${emp.empNumber}) เป็น "${DEFAULT_PASSWORD}"`, type: 'auth' });
     setShowResetModal(null);
+    setRefreshKey((k) => k + 1);
   };
 
   const handleDelete = (empId: string) => {
@@ -110,7 +113,7 @@ export default function AdminEmployeesPage() {
             </thead>
             <tbody className="text-sm">
               {filtered.map((emp) => (
-                <tr key={emp.id} className="border-b border-purple-100 hover:bg-purple-50/50">
+                <tr key={`${emp.id}-${refreshKey}`} className="border-b border-purple-100 hover:bg-purple-50/50">
                   <td className="px-4 py-3 font-medium text-purple-700">{emp.empNumber}</td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-900">{emp.name}</p>
