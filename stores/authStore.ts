@@ -7,6 +7,8 @@ import { Employee } from '@/types';
 interface AuthState {
   currentUser: Employee | null;
   isAuthenticated: boolean;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
   login: (empId: string, password: string) => boolean;
   logout: () => void;
 }
@@ -16,6 +18,8 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       currentUser: null,
       isAuthenticated: false,
+      _hasHydrated: false,
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
       login: (empId, password) => {
         const employees = useEmployeeStore.getState().employees;
         const emp = employees.find((e) => e.empNumber === empId && e.status === 'active');
@@ -26,6 +30,11 @@ export const useAuthStore = create<AuthState>()(
       },
       logout: () => set({ currentUser: null, isAuthenticated: false }),
     }),
-    { name: 'sfp_auth' }
+    {
+      name: 'sfp_auth',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    }
   )
 );

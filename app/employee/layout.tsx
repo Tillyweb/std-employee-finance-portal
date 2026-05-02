@@ -5,15 +5,17 @@ import { useAuthStore } from '@/stores/authStore';
 
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, currentUser } = useAuthStore();
+  const isHydrated = useAuthStore((s) => s._hasHydrated);
   const router = useRouter();
 
   useEffect(() => {
+    if (!isHydrated) return;
     if (!isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, isHydrated]);
 
-  if (!isAuthenticated) return null;
+  if (!isHydrated || !isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-purple-50 flex">

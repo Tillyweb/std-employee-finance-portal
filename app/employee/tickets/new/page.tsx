@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useTicketStore } from '@/stores/ticketStore';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 
 const MAX_LOAN = 50000;
 
-export default function NewTicketPage() {
+function NewTicketForm() {
   const searchParams = useSearchParams();
   const initialType = (searchParams.get('type') as 'loan' | 'advance') || 'loan';
   const router = useRouter();
@@ -96,5 +96,13 @@ export default function NewTicketPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function NewTicketPage() {
+  return (
+    <Suspense fallback={<div className="max-w-xl mx-auto space-y-6"><div className="h-96 bg-purple-50 rounded-2xl animate-pulse" /></div>}>
+      <NewTicketForm />
+    </Suspense>
   );
 }

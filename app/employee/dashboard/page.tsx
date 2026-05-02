@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useLoanStore } from '@/stores/loanStore';
 import { useAdvanceStore } from '@/stores/advanceStore';
@@ -12,6 +12,11 @@ import Link from 'next/link';
 
 export default function EmployeeDashboard() {
   const { currentUser } = useAuthStore();
+  const isHydrated = useTicketStore((s) => s._hasHydrated);
+  const initSeedData = useTicketStore((s) => s.initSeedData);
+  useEffect(() => {
+    if (isHydrated) initSeedData();
+  }, [isHydrated, initSeedData]);
   const loan = useLoanStore((s) => s.getLoan(currentUser?.empNumber ?? ''));
   const advance = useAdvanceStore((s) => s.getAdvance(currentUser?.empNumber ?? ''));
   const tickets = useTicketStore((s) => s.getTicketsByEmp(currentUser?.empNumber ?? ''));
