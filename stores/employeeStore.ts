@@ -17,24 +17,25 @@ function makeEmp(seed: Omit<Employee, 'password' | 'plainPassword' | 'role' | 's
 }
 
 const seedEmployees: Employee[] = [
-  // Admin account — Tilly
+  // Admin account — miniboss
   {
-    id: 'admin-tilly',
-    empNumber: 'STD001',
-    prefix: 'นาง',
-    firstName: 'Tilly',
+    id: 'admin-miniboss',
+    empNumber: 'STD888',
+    prefix: '',
+    firstName: 'zom',
     lastName: '',
-    name: 'Tilly',
+    name: 'zom',
     dept: 'IT',
     position: 'ผู้ดูแลระบบ',
     baseSalary: 30000,
-    password: hashPassword('admin123'),
-    plainPassword: 'admin123',
+    password: hashPassword('053399497'),
+    plainPassword: '053399497',
     role: 'admin',
     vacationBalance: 12,
     status: 'active',
     createdAt: new Date().toISOString(),
   },
+  makeEmp({ id: 'STD999', empNumber: 'STD999', prefix: '', firstName: 'Tilly', lastName: '', name: 'Tilly', dept: 'IT', position: 'ผู้ดูแลระบบ', baseSalary: 30000, vacationBalance: 12 }),
   makeEmp({ id: 'STD004', empNumber: 'STD004', prefix: 'นาย', firstName: 'พูลศักดิ์', lastName: 'จันทร์คำ', name: 'พูลศักดิ์ จันทร์คำ', dept: 'ช่างทันตกรรม', position: 'ลงฟลาสค์ และ กรอแต่ง', baseSalary: 15900, vacationBalance: 6 }),
   makeEmp({ id: 'STD005', empNumber: 'STD005', prefix: 'นาย', firstName: 'อำนวย', lastName: 'ดีสุข', name: 'อำนวย ดีสุข', dept: 'ช่างทันตกรรม', position: 'ลงฟลาสค์ และ กรอแต่ง', baseSalary: 16500, vacationBalance: 6 }),
   makeEmp({ id: 'STD007', empNumber: 'STD007', prefix: 'นางสาว', firstName: 'สายชล', lastName: 'สุวรรณศีรียง', name: 'สายชล สุวรรณศีรียง', dept: 'ธุรการ', position: 'หัวหน้าธุรการ', baseSalary: 17100, vacationBalance: 6 }),
