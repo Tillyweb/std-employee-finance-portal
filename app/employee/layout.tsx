@@ -12,8 +12,10 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
     if (!isHydrated) return;
     if (!isAuthenticated) {
       router.replace('/login');
+    } else if (currentUser?.role === 'admin') {
+      router.replace('/admin/dashboard');
     }
-  }, [isAuthenticated, router, isHydrated]);
+  }, [isAuthenticated, router, isHydrated, currentUser]);
 
   if (!isHydrated || !isAuthenticated) return null;
 

@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>()(
         set({ currentUser: emp, isAuthenticated: true });
         return true;
       },
-      logout: () => set({ currentUser: null, isAuthenticated: false }),
+      logout: () => { set({ currentUser: null, isAuthenticated: false }); window.location.href = '/login'; },
     }),
     {
       name: 'sfp_auth',
