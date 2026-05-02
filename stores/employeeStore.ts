@@ -59,6 +59,7 @@ interface EmployeeState {
   employees: Employee[];
   addEmployee: (emp: Employee) => void;
   updateEmployee: (id: string, data: Partial<Employee>) => void;
+  deleteEmployee: (id: string) => void;
   getEmployee: (id: string) => Employee | undefined;
   getEmployeeByNumber: (empNumber: string) => Employee | undefined;
 }
@@ -70,6 +71,7 @@ export const useEmployeeStore = create<EmployeeState>()(
       addEmployee: (emp) => set((s) => ({ employees: [...s.employees, emp] })),
       updateEmployee: (id, data) =>
         set((s) => ({ employees: s.employees.map((e) => (e.id === id ? { ...e, ...data } : e)) })),
+      deleteEmployee: (id) => set((s) => ({ employees: s.employees.filter((e) => e.id !== id) })),
       getEmployee: (id) => get().employees.find((e) => e.id === id),
       getEmployeeByNumber: (empNumber) => get().employees.find((e) => e.empNumber === empNumber),
     }),
