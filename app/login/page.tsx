@@ -78,10 +78,7 @@ export default function LoginPage() {
               เข้าสู่ระบบ
             </Button>
 
-            <div className="text-center text-xs text-gray-400 mt-2">
-              รหัสผ่านเริ่มต้น: <span className="font-mono text-purple-600">pass</span><br />
-              Admin: <span className="font-mono text-purple-600">STD001</span> / <span className="font-mono text-purple-600">admin123</span>
-            </div>
+
           </form>
         </Card>
       </div>
