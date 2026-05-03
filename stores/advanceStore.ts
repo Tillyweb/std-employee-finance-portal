@@ -135,8 +135,8 @@ export const useAdvanceStore = create<AdvanceState>()(
 
       addInstallment: (empId, amount) => {
         const adv = get().advances.find((a) => a.empId === empId);
-        if (adv && adv.installments.length >= 4) {
-          return { success: false, message: 'เบิกครบ 4 งวดแล้ว ไม่สามารถเบิกเพิ่มได้' };
+        if (adv && adv.installments.length >= 1) {
+          return { success: false, message: 'เบิกครบ 1 งวดแล้ว ไม่สามารถเบิกเพิ่มได้' };
         }
         set((s) => ({
           advances: s.advances.map((a) => {

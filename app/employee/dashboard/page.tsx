@@ -35,7 +35,7 @@ export default function EmployeeDashboard() {
         <Link href="/employee/tickets/new?type=advance">
           <Button className="w-full h-20 text-left justify-start px-6" size="lg">
             <CreditCard className="w-5 h-5 mr-3" />
-            <div><p className="font-semibold">💸 ขอเบิกเงินล่วงหน้า</p><p className="text-sm opacity-80">เบิกเงินล่วงหน้า 4 งวด</p></div>
+            <div><p className="font-semibold">💸 ขอเบิกเงินล่วงหน้า</p><p className="text-sm opacity-80">เบิกได้ 1 งวด (วันที่ 4-14)</p></div>
           </Button>
         </Link>
         <Link href="/employee/tickets/new?type=loan">
@@ -62,7 +62,7 @@ export default function EmployeeDashboard() {
             <div>
               <p className="text-sm text-fuchsia-500 font-medium">ยอดเบิกล่วงหน้าคงเหลือ</p>
               <p className="text-xl font-bold text-fuchsia-700">{advance ? advance.balance.toLocaleString('th-TH') : '0'} บาท</p>
-              {advance && <p className="text-xs text-gray-400">{advance.installments.length}/4 งวด</p>}
+              {advance && <p className="text-xs text-gray-400">{advance.installments.length}/1 งวด</p>}
             </div>
           </div>
         </Card>

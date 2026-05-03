@@ -31,6 +31,15 @@ function NewTicketForm() {
       setError(`วงเงินกู้สูงสุด ${MAX_LOAN.toLocaleString('th-TH')} บาท ต่อครั้ง`);
       return;
     }
+    // Advance: only allow days 4-14
+    if (type === 'advance') {
+      const today = new Date();
+      const day = today.getDate();
+      if (day < 4 || day > 14) {
+        setError('ระบบเปิดให้ยื่นคำขอเบิกล่วงหน้าได้เฉพาะวันที่ 4-14 ของทุกเดือน');
+        return;
+      }
+    }
     setSubmitting(true);
     addTicket({ empId: currentUser!.empNumber, type, amount: numAmount, reason: reason.trim(), status: 'pending' });
     addActivity({ icon: '📝', description: `${currentUser?.name} ยื่นคำขอ${type === 'loan' ? 'กู้เงิน' : 'เบิกล่วงหน้า'} ฿${numAmount.toLocaleString('th-TH')}`, type: 'ticket' });
@@ -57,7 +66,7 @@ function NewTicketForm() {
               <button type="button" onClick={() => setType('advance')} className={`p-4 rounded-xl border-2 transition-all ${type === 'advance' ? 'border-fuchsia-500 bg-fuchsia-50' : 'border-fuchsia-200 bg-white hover:bg-fuchsia-50'}`}>
                 <div className="text-2xl mb-1">💸</div>
                 <p className="font-semibold text-gray-900">ขอเบิกล่วงหน้า</p>
-                <p className="text-xs text-gray-500 mt-1">เบิกได้ 4 งวด</p>
+                <p className="text-xs text-gray-500 mt-1">เบิกได้ 1 งวด (วันที่ 4-14 ของเดือน)</p>
               </button>
             </div>
           </div>
