@@ -52,7 +52,7 @@ function NewTicketForm() {
               <button type="button" onClick={() => setType('loan')} className={`p-4 rounded-xl border-2 transition-all ${type === 'loan' ? 'border-purple-500 bg-purple-50' : 'border-purple-200 bg-white hover:bg-purple-50'}`}>
                 <div className="text-2xl mb-1">🏦</div>
                 <p className="font-semibold text-gray-900">ขอกู้เงิน</p>
-                <p className="text-xs text-gray-500 mt-1">สูงสุด ฿50,000</p>
+                <p className="text-xs text-gray-500 mt-1">สูงสุด ฿5,000</p>
               </button>
               <button type="button" onClick={() => setType('advance')} className={`p-4 rounded-xl border-2 transition-all ${type === 'advance' ? 'border-fuchsia-500 bg-fuchsia-50' : 'border-fuchsia-200 bg-white hover:bg-fuchsia-50'}`}>
                 <div className="text-2xl mb-1">💸</div>
@@ -73,7 +73,7 @@ function NewTicketForm() {
               placeholder="0"
               className="w-full px-4 py-2.5 border border-purple-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
-            {type === 'loan' && <p className="text-xs text-purple-400 mt-1">วงเงินกู้สูงสุด ฿50,000 ต่อครั้ง</p>}
+            {type === 'loan' && <p className="text-xs text-purple-400 mt-1">วงเงินกู้สูงสุด ฿5,000 ต่อครั้ง</p>}
             {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
           </div>
           <div>
