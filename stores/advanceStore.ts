@@ -100,6 +100,7 @@ interface AdvanceState {
   addAdvance: (advance: AdvanceAccount) => void;
   updateAdvance: (empId: string, data: Partial<AdvanceAccount>) => void;
   getAdvance: (empId: string) => AdvanceAccount | undefined;
+  deleteAdvance: (empId: string) => void;
   addInstallment: (empId: string, amount: number) => { success: boolean; message: string };
   deductFromAdvance: (empId: string, amount: number) => void;
   initFromSupabase: () => Promise<void>;
@@ -129,6 +130,8 @@ export const useAdvanceStore = create<AdvanceState>()(
       },
 
       getAdvance: (empId) => get().advances.find((a) => a.empId === empId),
+
+      deleteAdvance: (empId) => set((s) => ({ advances: s.advances.filter((a) => a.empId !== empId) })),
 
       addInstallment: (empId, amount) => {
         const adv = get().advances.find((a) => a.empId === empId);
